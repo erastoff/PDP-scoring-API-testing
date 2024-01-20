@@ -13,7 +13,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
 from scoring import get_score, get_interests
-
+from store import RedisStore
 
 SALT = "Otus"
 ADMIN_LOGIN = "admin"
@@ -114,6 +114,7 @@ class PhoneField(Field):
         self.field_name = self.__class__.__name__
 
     def validate(self):
+        # self.value = str(self.value)
         parent_result = super().validate()
         if not parent_result[0]:
             return parent_result[0], parent_result[1]
@@ -283,15 +284,15 @@ def method_handler(request, ctx, store):
     if not validator.validate(request["body"]):
         code = INVALID_REQUEST
         response = "Validation error: MethodRequest"
-        return response, code, ctx
+        return response, code
     if not check_auth(validator):
         code = FORBIDDEN
         response = "Forbidden"
-        return response, code, ctx
+        return response, code
     if not request["body"].get("method", False):
         code = INVALID_REQUEST
         response = "Method is not provided"
-        return response, code, ctx
+        return response, code
 
     if request["body"]["method"] == "online_score":
         has = []
@@ -306,31 +307,37 @@ def method_handler(request, ctx, store):
         else:
             code = INVALID_REQUEST
             response = "OnlineScoreRequest arguments error"
-            return response, code, ctx
+            return response, code
 
     elif request["body"]["method"] == "clients_interests":
         validator = ClientsInterestsRequest()
         if validator.validate(request["body"]["arguments"]):
             response = {}
             for item in request["body"]["arguments"]["client_ids"]:
-                response[f"client{item}"] = get_interests(store, item)
-            code = OK
-            ctx["nclients"] = len(request["body"]["arguments"]["client_ids"])
+                print(item, type(item))
+                try:
+                    response[f"client{item}"] = get_interests(store, item)
+                    code = OK
+                    ctx["nclients"] = len(request["body"]["arguments"]["client_ids"])
+                except:
+                    code = INTERNAL_ERROR
+                    response = "API can't connect to store"
+                    return response, code
         else:
             code = INVALID_REQUEST
             response = "ClientsInterestsRequest arguments error"
-            return response, code, ctx
+            return response, code
 
     else:
         logging.error("Invalid method - Unsupported method was given")
         code = INVALID_REQUEST
         response = "Unsupported method was given"
-    return response, code, ctx
+    return response, code
 
 
 class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {"method": method_handler}
-    store = None
+    store = RedisStore(host="localhost")
 
     def get_request_id(self, headers):
         return headers.get("HTTP_X_REQUEST_ID", uuid.uuid4().hex)
@@ -353,7 +360,7 @@ class MainHTTPHandler(BaseHTTPRequestHandler):
             logging.info("%s: %s %s" % (self.path, data_string, context["request_id"]))
             if path in self.router:
                 try:
-                    response, code, context = self.router[path](
+                    response, code = self.router[path](
                         {"body": request, "headers": self.headers}, context, self.store
                     )
                 except Exception as e:
