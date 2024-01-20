@@ -314,7 +314,6 @@ def method_handler(request, ctx, store):
         if validator.validate(request["body"]["arguments"]):
             response = {}
             for item in request["body"]["arguments"]["client_ids"]:
-                print(item, type(item))
                 try:
                     response[f"client{item}"] = get_interests(store, item)
                     code = OK

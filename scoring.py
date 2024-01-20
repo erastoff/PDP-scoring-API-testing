@@ -45,8 +45,4 @@ def get_interests(store, cid):
     r = store.get("i:%s" % cid)
     if r and isinstance(r, bytes):
         r = eval(r.decode("utf-8"))
-
-    # r = ["sport", "rock"]
-    print("r: ", r)
-    # return json.loads(r) if r else []
     return r

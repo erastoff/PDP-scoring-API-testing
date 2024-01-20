@@ -191,7 +191,6 @@ class TestSuite(unittest.TestCase):
         response, code = self.get_response(request)
         self.assertEqual(api.OK, code)
         score = response.get("score")
-        print(score, type(score))
         self.assertEqual(score, 3)
 
     @cases(
@@ -235,7 +234,6 @@ class TestSuite(unittest.TestCase):
         }
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        print("RESPONSE: ", response)
         self.assertEqual(api.OK, code, arguments)
         self.assertEqual(len(arguments["client_ids"]), len(response))
         self.assertEqual(self.context.get("nclients"), len(arguments["client_ids"]))
@@ -251,53 +249,30 @@ class TestSuite(unittest.TestCase):
             {"client_ids": [0]},
         ]
     )
-    def test_ok_interests_request(self, mock_redis_store, arguments):
+    def test_ok_redis_interests_request(self, mock_redis_store, arguments):
         mock_store_instance = Mock()
         mock_redis_store.return_value = mock_store_instance
         mock_store_instance.get.return_value = ["value1", "value2"]
-        print(
-            "Mock_store_instance: ",
-            mock_store_instance,
-            "mock_redis_store: ",
-            mock_redis_store.return_value,
-            "return values: ",
-            mock_store_instance.cache_get(),
-        )
-        # interests = [
-        #     "cars",
-        #     "pets",
-        #     "travel",
-        #     "hi-tech",
-        #     "sport",
-        #     "music",
-        #     "books",
-        #     "tv",
-        #     "cinema",
-        #     "geek",
-        #     "otus",
-        # ]
-        #
-        # for item in arguments["client_ids"]:
-        #     int_list = random.sample(interests, 2)
-        #     print(int_list)
-        #     self.store.rpush(item, *int_list)
         request = {
             "account": "horns&hoofs",
             "login": "h&f",
             "method": "clients_interests",
             "arguments": arguments,
         }
+
+        self.store = mock_store_instance
+
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        print("RESPONSE: ", response)
+        # print("RESPONSE: ", response)
         self.assertEqual(api.OK, code, arguments)
         self.assertEqual(len(arguments["client_ids"]), len(response))
-        # self.assertTrue(
-        #     all(
-        #         v and isinstance(v, list) and all(isinstance(i, str) for i in v)
-        #         for v in response.values()
-        #     )
-        # )
+        self.assertTrue(
+            all(
+                v and isinstance(v, list) and all(isinstance(i, str) for i in v)
+                for v in response.values()
+            )
+        )
         self.assertEqual(self.context.get("nclients"), len(arguments["client_ids"]))
 
 
