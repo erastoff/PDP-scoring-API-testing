@@ -6,7 +6,6 @@ import unittest
 from unittest.mock import patch, Mock
 
 import api
-from store import RedisStore
 
 
 def cases(cases):
