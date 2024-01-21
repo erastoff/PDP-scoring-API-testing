@@ -338,7 +338,7 @@ def method_handler(request, ctx, store):
 class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {"method": method_handler}
     store = RedisStore(host="localhost")
-    print("STORE: ", store)
+    # print("STORE: ", store)
 
     def get_request_id(self, headers):
         return headers.get("HTTP_X_REQUEST_ID", uuid.uuid4().hex)
