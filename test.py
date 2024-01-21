@@ -1,10 +1,10 @@
-import functools
 import datetime
+import functools
 import hashlib
 import subprocess
 import time
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import redis
 
@@ -30,7 +30,6 @@ class TestSuite(unittest.TestCase):
     def setUp(self):
         self.context = {}
         self.headers = {}
-        # self.store = RedisStore(host="localhost")
         self.mock_store_instance = Mock()
         self.store = self.mock_store_instance
 
@@ -260,11 +259,11 @@ class TestIntegrationSuite(unittest.TestCase):
         self.context = {}
         self.headers = {}
 
-        self.redis_process = subprocess.Popen(["redis-server", "--port", "6379"])
+        self.redis_process = subprocess.Popen(["redis-server", "--port", "6380"])
         time.sleep(2)
 
-        self.redis_conn = redis.StrictRedis(host="localhost", port=6379)
-        self.store = RedisStore(port=6379)
+        self.redis_conn = redis.StrictRedis(host="localhost", port=6380)
+        self.store = RedisStore(port=6380)
 
         self.redis_conn.flushall()
 
