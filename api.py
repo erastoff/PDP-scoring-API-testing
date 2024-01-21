@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import datetime
-import logging
 import hashlib
+import json
+import logging
 import re
 import uuid
 from argparse import ArgumentParser  # from optparse import OptionParser
 from http import HTTPStatus
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-
-from scoring import get_score, get_interests
+from scoring import get_interests, get_score
 from store import RedisStore
 
 SALT = "Otus"
@@ -318,7 +317,7 @@ def method_handler(request, ctx, store):
                     response[f"client{item}"] = get_interests(store, item)
                     code = OK
                     ctx["nclients"] = len(request["body"]["arguments"]["client_ids"])
-                except:
+                except Exception:
                     logging.exception("Could't connect to redis server")
                     code = INTERNAL_ERROR
                     response = "API can't connect to store"
@@ -338,7 +337,6 @@ def method_handler(request, ctx, store):
 class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {"method": method_handler}
     store = RedisStore(host="localhost")
-    # print("STORE: ", store)
 
     def get_request_id(self, headers):
         return headers.get("HTTP_X_REQUEST_ID", uuid.uuid4().hex)
