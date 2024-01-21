@@ -1,7 +1,6 @@
 import functools
 import datetime
 import hashlib
-import random
 import subprocess
 import time
 import unittest
@@ -391,7 +390,7 @@ class TestIntegrationSuite(unittest.TestCase):
             {"client_ids": [0]},
         ]
     )
-    def test_invalid_connection_request(self, arguments):
+    def test_invalid_conn_interest_request(self, arguments):
         with patch.object(self.store, "get", side_effect=redis.ConnectionError):
             request = {
                 "account": "horns&hoofs",
@@ -402,8 +401,36 @@ class TestIntegrationSuite(unittest.TestCase):
             self.set_valid_auth(request)
 
             response, code = self.get_response(request)
-            print(response, code)
+
             self.assertEqual(code, 500)
+
+    @cases(
+        [
+            {
+                "phone": "79175002040",
+                "email": "erastov@otus.ru",
+                "gender": 1,
+                "birthday": "01.01.1990",
+                "first_name": "Юрий",
+                "last_name": "Ерастов",
+            },
+            {"phone": "79175002040", "email": "stupnikov@otus.ru"},
+            {"phone": 79175002040, "email": "stupnikov@otus.ru"},
+        ]
+    )
+    def test_invalid_conn_score_request(self, arguments):
+        with patch.object(self.store, "get", side_effect=redis.ConnectionError):
+            request = {
+                "account": "horns&hoofs",
+                "login": "h&f",
+                "method": "online_score",
+                "arguments": arguments,
+            }
+            self.set_valid_auth(request)
+
+            response, code = self.get_response(request)
+
+            self.assertEqual(code, 200)
 
 
 if __name__ == "__main__":
