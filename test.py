@@ -381,6 +381,30 @@ class TestIntegrationSuite(unittest.TestCase):
 
         self.assertEqual(response, expected_response)
 
+    @cases(
+        [
+            {
+                "client_ids": [1, 2, 3],
+                "date": datetime.datetime.today().strftime("%d.%m.%Y"),
+            },
+            {"client_ids": [1, 2], "date": "19.07.2017"},
+            {"client_ids": [0]},
+        ]
+    )
+    def test_invalid_connection_request(self, arguments):
+        with patch.object(self.store, "get", side_effect=redis.ConnectionError):
+            request = {
+                "account": "horns&hoofs",
+                "login": "h&f",
+                "method": "clients_interests",
+                "arguments": arguments,
+            }
+            self.set_valid_auth(request)
+
+            response, code = self.get_response(request)
+            print(response, code)
+            self.assertEqual(code, 500)
+
 
 if __name__ == "__main__":
     unittest.main()
