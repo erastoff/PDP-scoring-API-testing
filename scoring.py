@@ -1,6 +1,5 @@
-import hashlib
-import json
 import datetime
+import hashlib
 import logging
 
 
@@ -21,15 +20,10 @@ def get_score(
         if birthday is not None
         else "",
     ]
-    # print("HERE: ", key_parts)
     key = "uid:" + hashlib.md5(bytes("".join(key_parts), "utf-8")).hexdigest()
-    # try get from cache,
-    # fallback to heavy calculation in case of cache miss
     score = store.cache_get(key) or 0
     if score:
-        # print("REDIS!!!! ", score)
         return float(score.decode("utf-8"))
-    # print("NO REDIS!!!! ", score)
     if phone:
         score += 1.5
     if email:
@@ -41,12 +35,15 @@ def get_score(
     # cache for 60 minutes
     try:
         store.cache_set(key, score, 60 * 60)
-    except:
+    except Exception:
         logging.exception("Could't connect to redis server to set new value")
     return score
 
 
 def get_interests(store, cid):
+    """
+    Function was modified by simplification of type of stored data
+    """
     r = store.get("i:%s" % cid)
     if r and isinstance(r, bytes):
         r = eval(r.decode("utf-8"))
