@@ -1,3 +1,5 @@
+import logging
+
 import redis
 import json
 import time
@@ -14,7 +16,7 @@ import time
 
 
 class RedisStore:
-    def __init__(self, host="localhost", port=6379, max_retries=3, timeout=5):
+    def __init__(self, host="localhost", port=6379, max_retries=3, timeout=2):
         self.host = host
         self.port = port
         self.max_retries = max_retries
@@ -35,8 +37,12 @@ class RedisStore:
         raise Exception("Failed to connect to Redis after multiple retries.")
 
     def cache_get(self, key):
-        # Assuming cache storage and key-value storage are the same in this example
-        return self.get(key)
+        try:
+            res = self.get(key)
+        except:
+            logging.exception("Could't connect to redis server to read value")
+            return None
+        return res
 
     def cache_set(self, key, value, timeout=5):
         for _ in range(self.max_retries):

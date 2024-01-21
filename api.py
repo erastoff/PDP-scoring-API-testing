@@ -319,6 +319,7 @@ def method_handler(request, ctx, store):
                     code = OK
                     ctx["nclients"] = len(request["body"]["arguments"]["client_ids"])
                 except:
+                    logging.exception("Could't connect to redis server")
                     code = INTERNAL_ERROR
                     response = "API can't connect to store"
                     return response, code
@@ -337,6 +338,7 @@ def method_handler(request, ctx, store):
 class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {"method": method_handler}
     store = RedisStore(host="localhost")
+    print("STORE: ", store)
 
     def get_request_id(self, headers):
         return headers.get("HTTP_X_REQUEST_ID", uuid.uuid4().hex)

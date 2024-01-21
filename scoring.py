@@ -1,6 +1,7 @@
 import hashlib
 import json
 import datetime
+import logging
 
 
 def get_score(
@@ -28,6 +29,7 @@ def get_score(
     if score:
         # print("REDIS!!!! ", score)
         return float(score.decode("utf-8"))
+    # print("NO REDIS!!!! ", score)
     if phone:
         score += 1.5
     if email:
@@ -37,7 +39,10 @@ def get_score(
     if first_name and last_name:
         score += 0.5
     # cache for 60 minutes
-    store.cache_set(key, score, 60 * 60)
+    try:
+        store.cache_set(key, score, 60 * 60)
+    except:
+        logging.exception("Could't connect to redis server to set new value")
     return score
 
 
