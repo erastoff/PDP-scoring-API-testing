@@ -41,8 +41,8 @@ jobs:
         flake8 app/api.py --count --ignore=E712,W503,C901 --exit-zero --max-complexity=11 --max-line-length=228 --statistics
         flake8 app/store.py
         flake8 app/scoring.py
-        flake8 tests/integration/test.py --max-line-length=228 --statistics
-        flake8 tests/unit/test.py --max-line-length=228 --statistics
+        flake8 tests/integration/test_integration.py --max-line-length=228 --statistics
+        flake8 tests/unit/test_unit.py --max-line-length=228 --statistics
     - name: Test with unittest
       run: |
         python -m unittest
