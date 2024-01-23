@@ -11,8 +11,8 @@ from argparse import ArgumentParser  # from optparse import OptionParser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from scoring import get_interests, get_score
-from store import RedisStore
+from app.scoring import get_interests, get_score
+from app.store import RedisStore
 
 SALT = "Otus"
 ADMIN_LOGIN = "admin"
